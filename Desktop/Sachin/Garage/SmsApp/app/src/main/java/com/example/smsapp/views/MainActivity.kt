@@ -96,7 +96,9 @@ class MainActivity : AppCompatActivity() {
                 while (hasData) {
                     val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
                     val body = cursor.getString(cursor.getColumnIndexOrThrow("body"))
-                    messages.add(Msg(address,body))
+                    if(body.contains("debited") || body.contains("credited")) {
+                        messages.add(Msg(address, body))
+                    }
                     hasData = cursor.moveToNext()
                 }
             }
