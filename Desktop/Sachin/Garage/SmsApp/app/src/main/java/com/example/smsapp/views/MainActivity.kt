@@ -2,17 +2,15 @@ package com.example.smsapp.views
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.database.Cursor
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smsapp.R
 import com.example.smsapp.adapter.MsgAdapter
 import com.example.smsapp.models.Msg
+import com.example.smsapp.utils.SmsHelper
 import com.example.smsapp.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -49,8 +47,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getMessages() {
-        val messages: ArrayList<Msg> = readSMS()
-        Log.i(TAG, "Number of Messages :: " + messages.size)
+        val messages: ArrayList<Msg> = SmsHelper(contentResolver).getAllBankingSms()
+//        Log.i(TAG, "Number of Messages :: " + messages.size)
         loadMessages(messages)
     }
 
@@ -81,32 +79,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun readSMS(): ArrayList<Msg> {
-        val mSmsQueryUri = Uri.parse(INBOX_URI)
-        val messages: ArrayList<Msg> = ArrayList()
-        var cursor: Cursor? = null
-        try {
-            cursor = contentResolver.query(mSmsQueryUri, null, null, null, null)
-            if (cursor == null) {
-                Log.i(TAG, "cursor is null. uri: $mSmsQueryUri")
-            } else {
-                var hasData: Boolean = cursor.moveToFirst()
-                while (hasData) {
-                    val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
-                    val body = cursor.getString(cursor.getColumnIndexOrThrow("body"))
-                    if(body.contains("debited") || body.contains("credited")) {
-                        messages.add(Msg(address, body))
-                    }
-                    hasData = cursor.moveToNext()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, e.message)
-        } finally {
-            cursor?.close()
-        }
-        return messages
     }
 }
