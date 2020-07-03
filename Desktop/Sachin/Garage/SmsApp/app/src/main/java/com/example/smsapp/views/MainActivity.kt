@@ -12,6 +12,7 @@ import com.example.smsapp.adapter.MsgAdapter
 import com.example.smsapp.models.Msg
 import com.example.smsapp.utils.SmsHelper
 import com.example.smsapp.utils.Utils
+import io.reactivex.Single
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -24,10 +25,12 @@ class MainActivity : AppCompatActivity() {
     private val TAG = MainActivity::class.java.name
     private val REQUEST_READ_SMS_PERMISSION = 2000
     private val INBOX_URI = "content://sms/inbox"
+    private lateinit var smsHelper: SmsHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        smsHelper = SmsHelper(this.application.contentResolver)
         checkMessages()
     }
 
@@ -47,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getMessages() {
-        val messages: ArrayList<Msg> = SmsHelper(contentResolver).getAllBankingSms()
+        val messages: ArrayList<Msg> = smsHelper.getAllBankingSms()
 //        Log.i(TAG, "Number of Messages :: " + messages.size)
         loadMessages(messages)
     }

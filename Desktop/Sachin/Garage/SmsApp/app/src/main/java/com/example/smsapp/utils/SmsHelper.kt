@@ -3,12 +3,15 @@ package com.example.smsapp.utils
 import android.content.ContentResolver
 import android.database.Cursor
 import android.net.Uri
+import android.provider.ContactsContract
 import android.util.Log
 import com.example.smsapp.models.Msg
 
 class SmsHelper(private val contentResolver: ContentResolver) {
     private val INBOX_URI = "content://sms/inbox"
     private val TAG = SmsHelper::class.simpleName
+    var reqCols = arrayOf("_id", "address", "body")
+
 
     fun getAllBankingSms(): ArrayList<Msg> {
         val mSmsQueryUri = Uri.parse(INBOX_URI)
@@ -19,15 +22,16 @@ class SmsHelper(private val contentResolver: ContentResolver) {
             if (cursor == null) {
                 Log.i(TAG, "cursor is null. uri: $mSmsQueryUri")
             } else {
-                var hasData: Boolean = cursor.moveToFirst()
-                while (hasData) {
-                    val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
-                    val body = cursor.getString(cursor.getColumnIndexOrThrow("body"))
-                    if (body.contains("debited") || body.contains("credited")) {
-                        messages.add(Msg(address, body))
-                    }
-                    hasData = cursor.moveToNext()
+                if (cursor?.moveToFirst()) {
+                    do {
+                        val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
+                        val body = cursor.getString(cursor.getColumnIndexOrThrow("body"))
+                        if (body.contains("debited") || body.contains("credited")) {
+                            messages.add(Msg(address, body))
+                        }
+                    } while (cursor.moveToNext())
                 }
+                cursor?.close()
             }
         } catch (e: Exception) {
             Log.e(TAG, e.message)
@@ -36,4 +40,5 @@ class SmsHelper(private val contentResolver: ContentResolver) {
         }
         return messages
     }
+
 }
